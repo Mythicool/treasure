@@ -63,8 +63,8 @@ function App() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary-50 to-white py-24">
         {/* Decorative blobs */}
-        <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-primary-200 blur-3xl opacity-50" />
-        <div className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-purple-200 blur-3xl opacity-40" />
+        <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-primary-200 blur-3xl opacity-50 float-slow" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-purple-200 blur-3xl opacity-40 float-slower" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -148,6 +148,13 @@ function App() {
             <p className="text-xl text-gray-600">
               Get started in minutes with our simple three-step process
             </p>
+            {/* Repeated CTA to improve conversion */}
+            <div className="mt-8">
+              <a href="#get-started" className="inline-flex items-center justify-center bg-primary-600 text-white hover:bg-primary-700 font-medium py-3 px-8 rounded-lg transition-colors">
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </a>
+            </div>
           </div>
 
 

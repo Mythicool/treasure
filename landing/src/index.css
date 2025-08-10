@@ -14,9 +14,10 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold text-gray-900;
-  }
+  h1 { @apply font-extrabold leading-tight; }
+  h2 { @apply font-bold leading-snug; }
+  h3 { @apply font-semibold; }
+  h4, h5, h6 { @apply font-medium; }
 }
 
 @layer components {
@@ -51,6 +52,20 @@
   .section-padding {
     @apply py-20 px-4 sm:px-6 lg:px-8;
   }
+@layer utilities {
+  .float-slow {
+    animation: float 6s ease-in-out infinite;
+  }
+  .float-slower {
+    animation: float 9s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) }
+  50% { transform: translateY(-12px) }
+  100% { transform: translateY(0px) }
+}
 }
 
 @layer base {
