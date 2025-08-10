@@ -1,0 +1,72 @@
+{
+  "name": "local-treasure-hunts",
+  "version": "1.0.0",
+  "description": "GPS-based treasure hunting platform for businesses and users",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "web",
+    "landing"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:mobile",
+    "install:mobile": "cd mobile && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\" \"npm run dev:landing\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npm start",
+    "dev:landing": "cd landing && npm run dev",
+    "build": "npm run build:backend && npm run build:web && npm run build:landing",
+    "build:backend": "cd backend && npm run build",
+    "build:web": "cd web && npm run build",
+    "build:landing": "cd landing && npm run build",
+    "test": "npm run test:backend && npm run test:web",
+    "test:backend": "cd backend && npm test",
+    "test:web": "cd web && npm test",
+    "test:e2e": "cd backend && npm run test:e2e",
+    "lint": "npm run lint:backend && npm run lint:web && npm run lint:landing",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:web": "cd web && npm run lint",
+    "lint:landing": "cd landing && npm run lint",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "db:setup": "cd backend && npm run db:setup",
+    "db:migrate": "cd backend && npm run db:migrate",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:reset": "cd backend && npm run db:reset",
+    "deploy": "./scripts/deploy_all.sh",
+    "bootstrap": "./scripts/bootstrap_local.sh"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/local-treasure-hunts.git"
+  },
+  "keywords": [
+    "treasure-hunt",
+    "gps",
+    "location-based",
+    "mobile-app",
+    "business-marketing",
+    "react-native",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Local Treasure Hunts Team",
+  "license": "MIT",
+  "dependencies": {
+    "@railway/cli": "^4.6.1",
+    "@supabase/supabase-js": "^2.54.0",
+    "vercel": "^44.7.3"
+  }
+}

@@ -1,0 +1,156 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: treasure_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm ci
+    
+    - name: Generate Prisma client
+      run: |
+        cd backend
+        npx prisma generate
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/treasure_test
+        JWT_SECRET: test-secret
+        NODE_ENV: test
+    
+    - name: Build backend
+      run: |
+        cd backend
+        npm run build
+
+  test-web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: web/package-lock.json
+    
+    - name: Install web dependencies
+      run: |
+        cd web
+        npm ci
+    
+    - name: Run web tests
+      run: |
+        cd web
+        npm test
+    
+    - name: Build web dashboard
+      run: |
+        cd web
+        npm run build
+
+  test-landing:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: landing/package-lock.json
+    
+    - name: Install landing dependencies
+      run: |
+        cd landing
+        npm ci
+    
+    - name: Build landing page
+      run: |
+        cd landing
+        npm run build
+
+  build-mobile:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: mobile/package-lock.json
+    
+    - name: Setup Expo CLI
+      run: npm install -g @expo/cli
+    
+    - name: Install mobile dependencies
+      run: |
+        cd mobile
+        npm ci
+    
+    - name: Check mobile app
+      run: |
+        cd mobile
+        npx expo export --platform web
+
+  deploy-staging:
+    needs: [test-backend, test-web, test-landing, build-mobile]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to staging
+      run: echo "Deploy to staging environment"
+      # Add actual deployment steps here
+
+  deploy-production:
+    needs: [test-backend, test-web, test-landing, build-mobile]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: echo "Deploy to production environment"
+      # Add actual deployment steps here

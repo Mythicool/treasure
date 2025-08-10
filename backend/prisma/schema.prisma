@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  BUSINESS
+  ADMIN
+}
+
+enum RewardType {
+  DISCOUNT
+  FREE_ITEM
+  COUPON
+  POINTS
+  CUSTOM
+}
+
+enum ClaimMethod {
+  GPS
+  QR_CODE
+  MANUAL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum HuntStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  displayName String?  @map("display_name")
+  role        UserRole @default(USER)
+  firebaseUid String?  @unique @map("firebase_uid")
+  avatar      String?
+  isVerified  Boolean  @default(false) @map("is_verified")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at")
+
+  // Relations
+  business Business?
+  claims   Claim[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Business {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  name        String
+  description String?
+  website     String?
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?  @map("zip_code")
+  country     String   @default("US")
+  isVerified  Boolean  @default(false) @map("is_verified")
+  stripeAccountId String? @map("stripe_account_id")
+  logo        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hunts        Hunt[]
+  transactions Transaction[]
+
+  @@map("businesses")
+}
+
+model Hunt {
+  id          String     @id @default(cuid())
+  businessId  String     @map("business_id")
+  title       String
+  description String?
+  status      HuntStatus @default(DRAFT)
+  startAt     DateTime?  @map("start_at")
+  endAt       DateTime?  @map("end_at")
+  isPremium   Boolean    @default(false) @map("is_premium")
+  maxClaims   Int?       @map("max_claims")
+  claimsCount Int        @default(0) @map("claims_count")
+  image       String?
+  rules       String?    // JSON string for custom rules
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  business  Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  lootBoxes LootBox[]
+  transactions Transaction[]
+
+  @@map("hunts")
+}
+
+model LootBox {
+  id           String     @id @default(cuid())
+  huntId       String     @map("hunt_id")
+  title        String
+  description  String?
+  lat          Decimal    @db.Decimal(10, 8) // Latitude with high precision
+  lng          Decimal    @db.Decimal(11, 8) // Longitude with high precision
+  radiusMeters Int        @default(30) @map("radius_meters")
+  rewardType   RewardType @map("reward_type")
+  rewardPayload String    @map("reward_payload") // JSON string with reward details
+  maxClaims    Int        @default(1) @map("max_claims")
+  claimsCount  Int        @default(0) @map("claims_count")
+  isActive     Boolean    @default(true) @map("is_active")
+  hint         String?    // Hint text shown to users
+  image        String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  hunt   Hunt    @relation(fields: [huntId], references: [id], onDelete: Cascade)
+  claims Claim[]
+
+  @@map("loot_boxes")
+}
+
+model Claim {
+  id         String      @id @default(cuid())
+  userId     String      @map("user_id")
+  lootBoxId  String      @map("loot_box_id")
+  method     ClaimMethod @default(GPS)
+  claimedAt  DateTime    @default(now()) @map("claimed_at")
+  isRedeemed Boolean     @default(false) @map("is_redeemed")
+  redeemedAt DateTime?   @map("redeemed_at")
+
+  // GPS verification data
+  claimLat   Decimal?    @map("claim_lat") @db.Decimal(10, 8)
+  claimLng   Decimal?    @map("claim_lng") @db.Decimal(11, 8)
+  accuracy   Float?      // GPS accuracy in meters
+
+  // Anti-fraud data
+  deviceId   String?     @map("device_id")
+  ipAddress  String?     @map("ip_address")
+  userAgent  String?     @map("user_agent")
+
+  // Reward data
+  rewardCode String?     @map("reward_code") // QR code or redemption code
+  metadata   String?     // JSON string for additional data
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lootBox LootBox @relation(fields: [lootBoxId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lootBoxId]) // Prevent duplicate claims
+  @@map("claims")
+}
+
+model Transaction {
+  id         String            @id @default(cuid())
+  businessId String            @map("business_id")
+  huntId     String?           @map("hunt_id")
+  amount     Int               // Amount in cents
+  currency   String            @default("USD")
+  stripeId   String?           @unique @map("stripe_id")
+  status     TransactionStatus @default(PENDING)
+  description String?
+  metadata   String?           // JSON string for additional data
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  hunt     Hunt?    @relation(fields: [huntId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // Action performed (e.g., "claim_created", "hunt_updated")
+  userId    String?  @map("user_id")
+  entityType String? @map("entity_type") // Type of entity affected
+  entityId  String?  @map("entity_id")   // ID of entity affected
+  metadata  String?  // JSON string with additional context
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model Leaderboard {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  huntId     String?  @map("hunt_id") // Null for global leaderboard
+  score      Int      @default(0)
+  claimsCount Int     @default(0) @map("claims_count")
+  lastClaimAt DateTime? @map("last_claim_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, huntId]) // One entry per user per hunt
+  @@map("leaderboards")
+}
+
+// Indexes for performance
+// These will be created as part of migrations
+// @@index([lat, lng]) on LootBox for spatial queries
+// @@index([claimedAt]) on Claim for time-based queries
+// @@index([status, startAt, endAt]) on Hunt for active hunt queries
