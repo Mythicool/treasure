@@ -104,37 +104,71 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 }
 
 function SidebarContent({ navigation, currentPath }: { navigation: any[], currentPath: string }) {
+  const { user, logout } = useAuth();
+
   return (
-    <div className="flex flex-col h-full pt-5 pb-4 overflow-y-auto bg-white border-r border-gray-200">
-      <div className="flex items-center flex-shrink-0 px-4">
-        <Map className="h-8 w-8 text-primary-600" />
-        <span className="ml-2 text-lg font-semibold text-gray-900">Business Portal</span>
+    <div className="flex flex-col h-full bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 text-white">
+      {/* Logo Section */}
+      <div className="flex items-center flex-shrink-0 px-6 py-6 border-b border-indigo-700/50">
+        <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+          <Trophy className="h-6 w-6 text-white" />
+        </div>
+        <div className="ml-3">
+          <h1 className="text-lg font-bold text-white">Treasure Hunts</h1>
+          <p className="text-xs text-indigo-300">Business Portal</p>
+        </div>
       </div>
-      
-      <div className="mt-5 flex-1 flex flex-col">
-        <nav className="flex-1 px-2 space-y-1">
+
+      {/* Navigation */}
+      <div className="flex-1 px-4 py-6">
+        <nav className="space-y-2">
           {navigation.map((item) => {
             const isActive = currentPath === item.href;
             return (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`${
+                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                   isActive
-                    ? 'bg-primary-100 border-primary-500 text-primary-700'
-                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                } group flex items-center px-2 py-2 text-sm font-medium border-l-4`}
+                    ? 'bg-white/10 text-white shadow-lg backdrop-blur-sm border border-white/20'
+                    : 'text-indigo-200 hover:bg-white/5 hover:text-white'
+                }`}
               >
                 <item.icon
-                  className={`${
-                    isActive ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                  } mr-3 h-5 w-5`}
+                  className={`mr-4 h-5 w-5 ${
+                    isActive ? 'text-amber-400' : 'text-indigo-300 group-hover:text-indigo-200'
+                  }`}
                 />
                 {item.name}
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 bg-amber-400 rounded-full"></div>
+                )}
               </Link>
             );
           })}
         </nav>
+      </div>
+
+      {/* User Profile */}
+      <div className="flex-shrink-0 px-4 py-4 border-t border-indigo-700/50">
+        <div className="flex items-center space-x-3 p-3 rounded-xl bg-white/5 backdrop-blur-sm">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-semibold text-sm">
+              {user?.email?.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">{user?.email}</p>
+            <p className="text-xs text-indigo-300">Business Owner</p>
+          </div>
+          <button
+            onClick={logout}
+            className="p-2 text-indigo-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
