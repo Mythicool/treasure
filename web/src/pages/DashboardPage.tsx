@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from 'react';
 import { Trophy, Users, MapPin, DollarSign, TrendingUp, Clock } from 'lucide-react';
 
 const stats = [
@@ -8,6 +9,8 @@ const stats = [
     change: '+12%',
     changeType: 'increase',
     icon: Trophy,
+    tint: 'from-amber-400 to-amber-600',
+    spark: [12, 14, 15, 13, 18, 20, 22],
   },
   {
     name: 'Active Users',
@@ -15,6 +18,8 @@ const stats = [
     change: '+8%',
     changeType: 'increase',
     icon: Users,
+    tint: 'from-indigo-400 to-indigo-600',
+    spark: [5, 7, 8, 6, 9, 8, 10],
   },
   {
     name: 'Active Hunts',
@@ -22,6 +27,8 @@ const stats = [
     change: '0%',
     changeType: 'neutral',
     icon: MapPin,
+    tint: 'from-emerald-400 to-emerald-600',
+    spark: [2, 3, 3, 3, 3, 3, 3],
   },
   {
     name: 'Revenue',
@@ -29,6 +36,8 @@ const stats = [
     change: '+23%',
     changeType: 'increase',
     icon: DollarSign,
+    tint: 'from-purple-400 to-purple-600',
+    spark: [200, 240, 180, 260, 280, 300, 320],
   },
 ];
 
@@ -62,52 +71,89 @@ const recentActivity = [
     hunt: 'Demo Coffee Shop Hunt',
   },
 ];
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
 export function DashboardPage() {
   return (
+      {isLoading && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 animate-pulse">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mt-8">
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="card">
+                <div className="h-6 w-1/3 bg-gray-200 rounded mb-4" />
+                <div className="h-8 w-1/2 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
       </div>
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         {/* Stats */}
         <div className="mt-8">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => (
-              <div key={stat.name} className="card">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <stat.icon className="h-6 w-6 text-gray-400" />
+              <div key={stat.name} className="card transition-transform duration-200 hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${stat.tint} flex items-center justify-center shadow-soft`}>
+                        <stat.icon className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="ml-4 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          {stat.name}
+                        </dt>
+                        <dd className="flex items-baseline">
+                          <div className="text-2xl font-semibold text-gray-900">
+                            {stat.value}
+                          </div>
+                          <div
+                            className={`ml-2 flex items-baseline text-sm font-semibold ${
+                              stat.changeType === 'increase'
+                                ? 'text-emerald-600'
+                                : stat.changeType === 'decrease'
+                                ? 'text-red-600'
+                                : 'text-gray-500'
+                            }`}
+                          >
+                            {stat.changeType === 'increase' && (
+                              <TrendingUp className="self-center flex-shrink-0 h-4 w-4" />
+                            )}
+                            <span className="sr-only">
+                              {stat.changeType === 'increase' ? 'Increased' : 'Decreased'} by
+                            </span>
+                            {stat.change}
+                          </div>
+                        </dd>
+                      </dl>
+                    </div>
                   </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        {stat.name}
-                      </dt>
-                      <dd className="flex items-baseline">
-                        <div className="text-2xl font-semibold text-gray-900">
-                          {stat.value}
-                        </div>
-                        <div
-                          className={`ml-2 flex items-baseline text-sm font-semibold ${
-                            stat.changeType === 'increase'
-                              ? 'text-green-600'
-                              : stat.changeType === 'decrease'
-                              ? 'text-red-600'
-                              : 'text-gray-500'
-                          }`}
-                        >
-                          {stat.changeType === 'increase' && (
-                            <TrendingUp className="self-center flex-shrink-0 h-4 w-4 text-green-500" />
-                          )}
-                          <span className="sr-only">
-                            {stat.changeType === 'increase' ? 'Increased' : 'Decreased'} by
-                          </span>
-                          {stat.change}
-                        </div>
-                      </dd>
-                    </dl>
+
+                  {/* Mini inline bar chart */}
+                  <div className="ml-4 hidden sm:block">
+                    <svg width="80" height="28" viewBox="0 0 80 28" aria-hidden="true">
+                      {stat.spark?.map((v, i) => {
+                        const max = Math.max(...stat.spark!);
+                        const h = Math.max(2, Math.round((v / (max || 1)) * 24));
+                        const x = i * 12;
+                        const y = 24 - h;
+                        return (
+                          <rect key={i} x={x} y={y} width="8" height={h} rx="2" className="fill-gray-200" />
+                        );
+                      })}
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -122,9 +168,18 @@ export function DashboardPage() {
               <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
               <Clock className="h-5 w-5 text-gray-400" />
             </div>
-            
+
             <div className="flow-root">
-              <ul className="-mb-8">
+              {recentActivity.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                    <Clock className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <p className="text-gray-700 font-medium">No recent activity</p>
+                  <p className="text-sm text-gray-500">Once players start claiming treasures, you'll see updates here.</p>
+                </div>
+              ) : (
+                <ul className="-mb-8">
                 {recentActivity.map((activity, activityIdx) => (
                   <li key={activity.id}>
                     <div className="relative pb-8">
@@ -157,6 +212,7 @@ export function DashboardPage() {
                   </li>
                 ))}
               </ul>
+              )}
             </div>
           </div>
         </div>

@@ -25,11 +25,11 @@
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 focus:ring-indigo-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+    @apply bg-gradient-to-r from-primary-600 to-purple-600 text-white hover:from-primary-700 hover:to-purple-700 focus:ring-primary-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
   }
 
   .btn-secondary {
-    @apply bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-indigo-500 shadow-sm;
+    @apply bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 focus:ring-primary-500 shadow-soft;
   }
 
   .btn-outline {

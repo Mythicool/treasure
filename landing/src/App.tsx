@@ -61,10 +61,14 @@ function App() {
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-white py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-50 to-white py-24">
+        {/* Decorative blobs */}
+        <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-primary-200 blur-3xl opacity-50" />
+        <div className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-purple-200 blur-3xl opacity-40" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-8 leading-tight">
               Turn Your City Into a
               <span className="text-primary-600"> Treasure Hunt</span>
             </h1>
@@ -81,6 +85,7 @@ function App() {
                 Watch Demo
               </a>
             </div>
+            {/* Repeat primary CTA after fold suggestion: keep as section below */}
           </div>
         </div>
       </section>
@@ -145,6 +150,7 @@ function App() {
             </p>
           </div>
 
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <StepCard
               number="1"
@@ -158,9 +164,54 @@ function App() {
             />
             <StepCard
               number="3"
+          {/* Brand trust section */}
+          <section className="py-12 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <p className="text-sm uppercase tracking-widest text-gray-500">Trusted by local favorites</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6 items-center opacity-80">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-10 bg-gray-200 rounded-md" />
+                ))}
+              </div>
+            </div>
+          </section>
               title="Watch Engagement Soar"
               description="Customers discover and claim treasures, driving foot traffic and engagement. Track results in real-time."
             />
+          </div>
+        </div>
+      </section>
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Loved by Businesses and Customers Alike
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              See how Local Treasure Hunts is helping businesses create unforgettable experiences.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1,2,3].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-soft border border-gray-100 p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center">
+                    <Users className="h-6 w-6 text-primary-600" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="font-semibold text-gray-900">Business Owner {i}</p>
+                    <p className="text-sm text-gray-500">San Francisco, CA</p>
+                  </div>
+                </div>
+                <p className="text-gray-600">
+                  "We've seen a significant increase in foot traffic and customer engagement. The treasure hunt concept is brilliant!"
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
